@@ -8,11 +8,19 @@ const userSchema = new mongoose.Schema({
     address: String,
     cart: [{
         type: mongoose.Schema.Types.ObjectId,
+        ref: "Order",
+    }],
+    saved: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order",
+    }],
+    favourites: [{
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
     }],
     pastOrders: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "Order",
     }],
     reviews: [{
         type: mongoose.Schema.Types.ObjectId,

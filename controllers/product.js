@@ -1,3 +1,4 @@
+import { Order } from "../models/order.js";
 import {Product} from "../models/product.js";
 import { User } from "../models/user.js";
 
@@ -56,63 +57,31 @@ const getProductDetail = async(req,res)=> {
     }
 }
 
-const addToCart = async(req,res) => {
-    try{
-        const newUser = await User.findByIdAndUpdate(req.userId,{$push: {cart: req.body.productId}}, {new:true}).populate("cart");
-        const items = newUser.cart;
-        res.status(201).json(items);
-    } catch(err){
-        res.status(401).json({error:err});
-    }
-}
-
-const removeFromCart = async(req,res) => {
+const buyProduct = async(req,res) => {
     try{
         const user = await User.findById(req.userId);
-        const index = user.cart.indexOf(req.body.productId);
-        user.cart.splice(index,1);
+        await Order.updateMany({user: req.userId, placed:1},{placed:2});
+        const orders = await Order.find({user: req.userId, placed:2});
+        user.cart=[];
+        orders.map(async(item)=>{
+            user.pastOrders.push(item._id);
+        });
         await user.save();
         const newUser = await User.findById(req.userId).populate("cart");
-        const items = newUser.cart;
-        res.status(201).json(items);
+        const items = await User.populate(newUser, {path: 'cart.product'});
+        res.status(201).json(items.cart);
     } catch(err){
         res.status(401).json({error:err});
     }
 }
 
-const getCartItems = async(req,res) => {
-    try{
-        const user = await User.findById(req.userId).populate("cart");
-        const items = user.cart;
-        res.status(201).json(items);
-    } catch(err){
-        res.status(401).json({error:err});
-    }
+const addToFav = async() => {
+    // try{
+    //     const user = await User.findByIdAndUpdate(req.userId, {$push: {favourites:req.body.productId}}, {new:true}).populate("cart").populate("pastOrders");
+    //     res.status(201).json(user);
+    // } catch(err){
+    //     res.status(401).json({error:err});
+    // }
 }
 
-const isInCart = async(req,res) => {
-    try{
-        const productId = req.params.productId;
-        const user = await User.find({_id:req.userId, cart: { $in: [ productId ] }});
-        if(user.length!==0){
-            res.status(201).json({flag:true});
-        }
-        else{
-            res.status(201).json({flag:false});
-        }
-    } catch(error){
-        res.status(401).json({error:error});
-    }
-}
-
-const buyProduct = async(req,res) => {
-    const products = req.body.products;
-    try{
-        const user = await User.findByIdAndUpdate(req.userId, {$push: {pastOrders:{$each : products}}}, {new:true}).populate("cart").populate("pastOrders");
-        res.status(201).json(user);
-    } catch(err){
-        res.status(401).json({error:err});
-    }
-}
-
-export {addProduct, getAllProducts, getProductDetail, addToCart, removeFromCart, getCartItems, isInCart, buyProduct};
+export {addProduct, getAllProducts, getProductDetail, buyProduct, addToFav};

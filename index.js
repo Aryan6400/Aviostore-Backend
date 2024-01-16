@@ -5,9 +5,11 @@ import cors from "cors";
 import dotenv from "dotenv";
 const port = process.env.PORT || 8080;
 
-import { addProduct, addToCart, buyProduct, getAllProducts, getCartItems, getProductDetail, isInCart, removeFromCart } from "./controllers/product.js";
+import { addProduct, addToFav, buyProduct, getAllProducts, getProductDetail } from "./controllers/product.js";
 import { register, login } from "./controllers/auth.js";
 import auth from "./middlewares/auth.js";
+import { addToCart, getCartItems, isInCart, removeAllFromCart, removeFromCart } from "./controllers/cart.js";
+import { saveForLater } from "./controllers/savedForLater.js";
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,8 +30,11 @@ app.get('/product/:productId', getProductDetail);
 app.get('/get-cart', auth, getCartItems);
 app.patch('/add-to-cart', auth, addToCart);
 app.patch('/remove-from-cart', auth, removeFromCart);
+app.patch('/remove-all-from-cart', auth, removeAllFromCart);
 app.get("/is-in-cart/:productId", auth, isInCart);
-app.post("/buy-products", auth, buyProduct);
+app.patch('/add-to-later', auth, saveForLater);
+app.patch("/buy-products", auth, buyProduct);
+app.patch('/add-to-fav', auth, addToFav);
 app.post('/login', login);
 app.post('/register', register);
 
