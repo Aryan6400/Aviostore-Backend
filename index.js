@@ -5,11 +5,11 @@ import cors from "cors";
 import dotenv from "dotenv";
 const port = process.env.PORT || 8080;
 
-import { addProduct, addToFav, buyProduct, getAllProducts, getProductDetail } from "./controllers/product.js";
+import { addProduct, addToFav, buyProduct, getAllProducts, getFavs, getProductDetail } from "./controllers/product.js";
 import { register, login } from "./controllers/auth.js";
 import auth from "./middlewares/auth.js";
 import { addToCart, getCartItems, isInCart, removeAllFromCart, removeFromCart } from "./controllers/cart.js";
-import { saveForLater } from "./controllers/savedForLater.js";
+import { getSaved, moveToCart, removeFromSaved, saveForLater } from "./controllers/savedForLater.js";
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,9 +32,15 @@ app.patch('/add-to-cart', auth, addToCart);
 app.patch('/remove-from-cart', auth, removeFromCart);
 app.patch('/remove-all-from-cart', auth, removeAllFromCart);
 app.get("/is-in-cart/:productId", auth, isInCart);
-app.patch('/add-to-later', auth, saveForLater);
 app.patch("/buy-products", auth, buyProduct);
+
+app.patch('/add-to-later', auth, saveForLater);
 app.patch('/add-to-fav', auth, addToFav);
+app.get('/get-saved', auth, getSaved);
+app.get('/get-favs', auth, getFavs);
+app.patch('/remove-from-saved', auth, removeFromSaved);
+app.patch('/move-to-cart', auth, moveToCart);
+
 app.post('/login', login);
 app.post('/register', register);
 

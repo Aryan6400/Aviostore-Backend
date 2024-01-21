@@ -12,13 +12,12 @@ const productSchema = new mongoose.Schema({
     reviews: Number,
     status: String,
     deliveryCharges: Number,
-    seller: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Seller",
-    },
+    seller: String,
     cod: String,
     return: String,
     replacement: String,
+    primaryCategory: String,
+    secondaryCategory: String,
     buyers: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

@@ -3,45 +3,26 @@ import {Product} from "../models/product.js";
 import { User } from "../models/user.js";
 
 const addProduct = async(req,res)=> {
-    const {
-        title,
-        price,
-        originalPrice,
-        shortDescription,
-        offer,
-        img_url,
-        rate,
-        ratings,
-        reviews,
-        status,
-        deliveryCharges,
-        seller,
-    } = req.body;
     try{
-        const newProduct = await Product.create({
-            title,
-            price,
-            originalPrice,
-            shortDescription,
-            offer,
-            img_url,
-            rate,
-            ratings,
-            reviews,
-            status,
-            deliveryCharges,
-            seller,
-        });
-        res.status(201).json(newProduct);
+        const result = await Product.insertMany(req.body.products);
+        res.status(201).json(result);
     } catch(err){
         res.status(401).json({error:err});
     }
 }
 
 const getAllProducts = async(req,res)=> {
+    const primaryCategory = req.query.primaryCategory;
+    const secondaryCategory = req.query.secondaryCategory;
     try{
-        const products = await Product.find();
-        res.status(201).json(products);
+        if(primaryCategory==="None"){
+            const products = await Product.find();
+            res.status(201).json(products);
+        }
+        else{
+            const products = await Product.find({primaryCategory:primaryCategory, secondaryCategory:secondaryCategory});
+            res.status(201).json(products);
+        }
     } catch(err){
         res.status(401).json({error:err});
     }
@@ -75,13 +56,22 @@ const buyProduct = async(req,res) => {
     }
 }
 
-const addToFav = async() => {
-    // try{
-    //     const user = await User.findByIdAndUpdate(req.userId, {$push: {favourites:req.body.productId}}, {new:true}).populate("cart").populate("pastOrders");
-    //     res.status(201).json(user);
-    // } catch(err){
-    //     res.status(401).json({error:err});
-    // }
+const addToFav = async(req,res) => {
+    try{
+        const user = await User.findByIdAndUpdate(req.userId, {$push: {favourites:req.body.productId}}, {new:true}).populate("cart").populate("pastOrders");
+        res.status(201).json(user);
+    } catch(err){
+        res.status(401).json({error:err});
+    }
 }
 
-export {addProduct, getAllProducts, getProductDetail, buyProduct, addToFav};
+const getFavs = async(req,res) => {
+    try {
+        const user = await User.findById(req.userId).populate("favourites");
+        res.status(201).json(user.favourites);
+    } catch (err) {
+        res.status(401).json({error:err});
+    }
+}
+
+export {addProduct, getAllProducts, getProductDetail, buyProduct, addToFav, getFavs};
